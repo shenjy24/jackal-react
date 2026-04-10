@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import { queryClient } from '@/services/queryClient'
 import { router } from '@/router'
+import 'antd/dist/reset.css'
 import './index.css'
 
 createRoot(document.getElementById('root')!).render(

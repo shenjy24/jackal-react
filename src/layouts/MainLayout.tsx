@@ -1,49 +1,78 @@
-import { NavLink, Outlet } from 'react-router-dom'
-import { Button } from '@/components/Button'
+import { HomeOutlined, MenuFoldOutlined, MenuUnfoldOutlined, TeamOutlined } from '@ant-design/icons'
+import { Breadcrumb, Button, Layout, Menu, Space, Typography } from 'antd'
+import type { MenuProps } from 'antd'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useUiStore } from '@/store/ui.store'
 
-const linkClass = ({ isActive }: { isActive: boolean }) =>
-  `rounded-md px-3 py-2 text-sm font-medium ${
-    isActive
-      ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
-  }`
+const { Header, Sider, Content } = Layout
+
+const menuItems: MenuProps['items'] = [
+  { key: '/', icon: <HomeOutlined />, label: '仪表盘' },
+  { key: '/users', icon: <TeamOutlined />, label: '用户管理' },
+]
 
 export function MainLayout() {
   const { sidebarOpen, toggleSidebar } = useUiStore()
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const selectedKey = pathname.startsWith('/users') ? '/users' : '/'
+  const breadcrumbItems = [
+    { title: '后台' },
+    { title: selectedKey === '/' ? '仪表盘' : '用户管理' },
+  ]
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
-      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-          <div className="flex items-center gap-6">
-            <span className="text-lg font-semibold">SPA Starter</span>
-            <nav className="flex gap-1">
-              <NavLink to="/" end className={linkClass}>
-                首页
-              </NavLink>
-              <NavLink to="/users" className={linkClass}>
-                用户
-              </NavLink>
-            </nav>
-          </div>
-          <Button variant="ghost" type="button" onClick={toggleSidebar}>
-            {sidebarOpen ? '收起侧栏' : '展开侧栏'}
-          </Button>
+    <Layout style={{ minHeight: '100vh' }}>
+      <Sider trigger={null} collapsible collapsed={!sidebarOpen} theme="light" width={220}>
+        <div style={{ padding: 16 }}>
+          <Typography.Title level={4} style={{ margin: 0 }}>
+            Admin Console
+          </Typography.Title>
         </div>
-      </header>
+        <Menu
+          mode="inline"
+          selectedKeys={[selectedKey]}
+          items={menuItems}
+          onClick={({ key }) => navigate(key)}
+        />
+      </Sider>
 
-      <div className="mx-auto flex w-full max-w-5xl flex-1 gap-6 px-4 py-8">
-        {sidebarOpen && (
-          <aside className="hidden w-48 shrink-0 rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 md:block">
-            <p className="font-medium text-slate-900 dark:text-slate-100">侧栏</p>
-            <p className="mt-2">Zustand 控制显隐的示例区域。</p>
-          </aside>
-        )}
-        <main className="min-w-0 flex-1">
-          <Outlet />
-        </main>
-      </div>
-    </div>
+      <Layout>
+        <Header
+          style={{
+            padding: '0 16px',
+            background: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: '1px solid #f0f0f0',
+          }}
+        >
+          <Space>
+            <Button
+              type="text"
+              icon={sidebarOpen ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />}
+              onClick={toggleSidebar}
+            />
+            <Typography.Text strong>常用管理后台</Typography.Text>
+          </Space>
+          <Typography.Text type="secondary">你好，管理员</Typography.Text>
+        </Header>
+
+        <Content style={{ margin: 16 }}>
+          <Breadcrumb items={breadcrumbItems} style={{ marginBottom: 16 }} />
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 8,
+              padding: 16,
+              minHeight: 'calc(100vh - 130px)',
+            }}
+          >
+            <Outlet />
+          </div>
+        </Content>
+      </Layout>
+    </Layout>
   )
 }
